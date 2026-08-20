@@ -180,7 +180,10 @@ watch(
 	},
 )
 
-const isPositionSorting = computed(() => 'position' in sortByParam.value)
+// Positions are stored per view, and a subproject's task has no position in this
+// project's view - the api drops the position sort for that reason. Reordering
+// would write positions nothing reads, so it is offered only without subprojects.
+const isPositionSorting = computed(() => 'position' in sortByParam.value && !includeSubprojects.value)
 
 const taskStore = useTaskStore()
 const {handleTaskDropToProject} = useTaskDragToProject()
