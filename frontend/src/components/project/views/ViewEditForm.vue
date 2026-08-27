@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onBeforeMount, ref, watch} from 'vue'
+import {computed, onBeforeMount, ref, watch} from 'vue'
 
 import type {IProjectView} from '@/modelTypes/IProjectView'
 import type {IFilters} from '@/modelTypes/ISavedFilter'
@@ -29,6 +29,18 @@ const emit = defineEmits<{
 }>()
 
 const view = ref<IProjectView>()
+
+// IFilters keeps include_subprojects optional so filters without it stay valid, which
+// leaves the checkbox binding as boolean | undefined. Read it through a computed rather
+// than making every filter object carry the key.
+const includeSubprojects = computed({
+	get: () => view.value?.filter?.include_subprojects ?? false,
+	set: (value: boolean) => {
+		if (view.value?.filter) {
+			view.value.filter.include_subprojects = value
+		}
+	},
+})
 
 const labelStore = useLabelStore()
 const projectStore = useProjectStore()
@@ -196,7 +208,7 @@ function handleBubbleSave() {
 			class="field mbe-3"
 		>
 			<FancyCheckbox
-				v-model="view.filter.include_subprojects"
+				v-model="includeSubprojects"
 				v-tooltip="$t('project.views.includeSubprojectsHint')"
 			>
 				{{ $t('project.views.includeSubprojects') }}
